@@ -19,64 +19,50 @@ This is especially useful for sites that require authentication or interactive s
 
 ## Installation
 
-1. Open `chrome://extensions` in Chrome (or your Chromium-based browser)
-2. Enable **Developer mode** (toggle in the top-right)
-3. Click **Load unpacked** and select the `browser-extension/` directory
-4. The Xinfer Crawler icon should appear in your extensions toolbar
+1. Clone the repository:
+   ```
+   git clone https://github.com/xinferai/xinfer-browser-extension.git
+   ```
+2. Open `chrome://extensions` in Chrome (or your Chromium-based browser)
+3. Enable **Developer mode** (toggle in the top-right)
+4. Click **Load unpacked** and select the cloned directory
+5. The Xinfer Crawler icon should appear in your extensions toolbar
 
-To update after code changes, click the refresh icon on the extension card in `chrome://extensions`.
+To update, pull the latest changes and click the refresh icon on the extension card in `chrome://extensions`.
 
 ## How it works
 
-The extension uses a three-layer architecture:
+The extension uses a three-layer design: a host page communicates with a content script, which relays messages to a background service worker.
 
-```
-Admin page (React)  ←→  content.js  ←→  background.js (service worker)
-   CustomEvents          chrome.runtime.sendMessage       chrome.tabs API
-```
-
-**1. Extension detection** — When the admin page loads, the `useExtensionCrawl` hook pings the content script via `RAG_CRAWL_EXTENSION_PING` / `RAG_CRAWL_EXTENSION_PONG` events.
+**1. Extension detection** — When a host page loads, it sends a ping event. If the extension's content script is present, it responds with a pong, confirming the extension is installed and active.
 
 **2. Tab-based crawl flow:**
 
-1. Admin page requests `open` → background creates a new tab with the first URL
-2. User sees the tab, completes any login/CAPTCHA if needed, then clicks **Continue** in the admin UI
-3. Admin page requests `extract` → background runs `chrome.scripting.executeScript` to capture the rendered HTML from the current tab
-4. For each subsequent URL, admin page requests `fetch` → background navigates the same tab to the new URL, waits for load + JS rendering, and extracts HTML automatically
-5. When done, admin page requests `close` → background closes the crawl tab
+1. The host page requests a new tab to be opened with the first URL
+2. You see the tab and complete any login or CAPTCHA if needed, then continue from the host page
+3. The extension captures the fully rendered HTML from the open tab
+4. For each subsequent URL, the extension navigates the same tab, waits for the page to render, and extracts HTML automatically
+5. When the crawl is complete, the tab is closed
 
-**3. MV3 service worker persistence** — Chrome's Manifest V3 service workers go idle after ~30 seconds of inactivity, losing all in-memory state. The extension persists the crawl tab ID via `chrome.storage.session` so it survives service worker restarts (e.g., while the user spends time logging in).
-
-### Message types
-
-| Action    | Message type        | Description                                    |
-| --------- | ------------------- | ---------------------------------------------- |
-| `open`    | `CRAWL_TAB_OPEN`    | Create a new tab and navigate to URL           |
-| `fetch`   | `CRAWL_TAB_FETCH`   | Navigate existing tab to URL, extract HTML     |
-| `extract` | `CRAWL_TAB_EXTRACT` | Extract HTML from current tab state            |
-| `close`   | `CRAWL_TAB_CLOSE`   | Close the crawl tab                            |
-| (legacy)  | `FETCH_URL`         | Fetch URL via service worker `fetch()` (no tab)|
+**3. Service worker persistence** — Chrome's Manifest V3 service workers go idle after a short period of inactivity, losing all in-memory state. The extension persists its state to session storage so it survives service worker restarts (e.g., while you spend time logging in).
 
 ## Permissions
 
 | Permission                  | Why it's needed                                                        |
 | --------------------------- | ---------------------------------------------------------------------- |
 | `tabs` / `activeTab`        | Open, navigate, and manage the crawl tab                               |
-| `scripting`                 | Inject a script to read `document.documentElement.outerHTML` from tabs  |
-| `storage`                   | Persist crawl tab ID across service worker restarts via `chrome.storage.session` |
+| `scripting`                 | Inject a script to read rendered page content from tabs                |
+| `storage`                   | Persist state across service worker restarts                           |
 | `host_permissions` (`<all_urls>`) | Load and capture pages across any domain you choose to crawl     |
 
 ## Privacy and data handling
 
-The extension only acts when you initiate a crawl from the Xinfer admin panel. Captured HTML is sent to your Xinfer instance for processing. Your browsing session remains under your control, and interactive steps (login, CAPTCHA) happen directly in your browser. No data is sent to third parties.
+The extension only acts when you initiate a crawl from a host page. Captured HTML is sent to your Xinfer instance for processing. Your browsing session remains under your control, and interactive steps (login, CAPTCHA) happen directly in your browser. No data is sent to third parties.
 
-## File structure
+## Contributing
 
-```
-browser-extension/
-  background.js    # Service worker — tab management, HTML extraction, legacy fetch
-  content.js       # Content script — bridges page events to background messages
-  manifest.json    # Extension manifest (MV3)
-  icons/           # Extension icons (16, 32, 48, 128px)
-  README.md
-```
+This is an open-source project. Issues and pull requests are welcome at [github.com/xinferai/xinfer-browser-extension](https://github.com/xinferai/xinfer-browser-extension).
+
+## License
+
+See [LICENSE](LICENSE) for details.
