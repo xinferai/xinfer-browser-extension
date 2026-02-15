@@ -19,16 +19,25 @@ This is especially useful for sites that require authentication or interactive s
 
 ## Installation
 
+### Option 1: Chrome Web Store
+
+1. Open the [Xinfer Crawler](https://chromewebstore.google.com/detail/xinfer-crawler) page on the Chrome Web Store
+2. Click **Add to Chrome**
+3. Click **Add extension** in the confirmation dialog
+4. The Xinfer Crawler icon appears in your Chrome toolbar
+
+### Option 2: From Source
+
 1. Clone the repository:
    ```
    git clone https://github.com/xinferai/xinfer-browser-extension.git
    ```
 2. Open `chrome://extensions` in Chrome (or your Chromium-based browser)
 3. Enable **Developer mode** (toggle in the top-right)
-4. Click **Load unpacked** and select the cloned directory
+4. Click **Load unpacked** and select the `src` folder inside the cloned directory
 5. The Xinfer Crawler icon should appear in your extensions toolbar
 
-To update, pull the latest changes and click the refresh icon on the extension card in `chrome://extensions`.
+To update from source, pull the latest changes and click the refresh icon on the extension card in `chrome://extensions`.
 
 ## How it works
 
