@@ -1,0 +1,20 @@
+Xinfer Crawler fetches web pages through your browser session, using the same cookies, login state, and network path you already use while browsing. Instead of trying to reproduce complex website behaviors from a server (which often breaks on sign-in pages, session checks, bot defenses, or region-restricted content), the extension opens URLs in a real browser tab and captures the fully rendered HTML.
+
+This is especially useful for sites that require authentication or interactive steps. If a page needs you to sign in, accept consent banners, or complete a CAPTCHA, the tab is opened so you can handle those steps normally. Once access is granted, the extension continues capturing authorized page content automatically.
+
+What it does:
+
+* Opens URLs in a real browser tab using your current network connection
+* Uses your active session (cookies, logged-in state) to access authenticated content
+* Captures page content after JavaScript renders, suitable for modern SPA sites
+* Lets you complete login, verification, or CAPTCHA prompts on the first page, then auto-crawls the rest
+* Works across any domain (your own sites, subdomains, localhost for development)
+
+What it doesn't do:
+
+* It does not bypass paywalls, CAPTCHAs, or access controls — if a site requires user action, you complete it in the tab as you normally would
+* It does not "hack" authentication — everything relies on your legitimate browser session
+
+Privacy and data handling:
+
+The extension only acts when you initiate a crawl from the Xinfer admin panel. Captured HTML is sent to your Xinfer instance for processing. Your browsing session remains under your control, and interactive steps (login, CAPTCHA) happen directly in your browser. No data is sent to third parties.
